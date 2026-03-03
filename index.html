@@ -3,182 +3,398 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>YouTube Player</title>
+<title>Eirene</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Cinzel:wght@400;600&family=IM+Fell+English:ital@1&display=swap" rel="stylesheet">
 <style>
+  :root {
+    --black: #080808;
+    --deep: #0d0d0d;
+    --surface: #111111;
+    --border: #2a2a2a;
+    --muted: #333;
+    --ash: #555;
+    --silver: #888;
+    --light: #bbb;
+    --white: #f0f0f0;
+    --gold: #ffffff;
+    --gold-dim: #666;
+  }
+
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
-  body {
-    background: #0f0f0f;
-    color: #fff;
-    font-family: 'Segoe UI', sans-serif;
+  html, body {
+    min-height: 100vh;
+    background: var(--black);
+    color: var(--white);
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    overflow-x: hidden;
+  }
+
+  /* Grain overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.4;
+  }
+
+  /* Vignette */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.7) 100%);
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .page {
+    position: relative;
+    z-index: 2;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 40px 20px;
+    padding: 60px 24px 80px;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 64px;
+    animation: fadeDown 1.2s ease both;
+  }
+
+  .eyebrow {
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.35em;
+    color: var(--gold-dim);
+    text-transform: uppercase;
+    margin-bottom: 16px;
   }
 
   h1 {
-    font-size: 1.8rem;
-    margin-bottom: 8px;
-    background: linear-gradient(135deg, #ff4444, #ff6b35);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
-
-  p.sub {
-    color: #888;
-    font-size: 0.9rem;
-    margin-bottom: 30px;
-  }
-
-  .search-bar {
-    display: flex;
-    gap: 10px;
-    width: 100%;
-    max-width: 700px;
-    margin-bottom: 30px;
-  }
-
-  input {
-    flex: 1;
-    padding: 14px 18px;
-    border-radius: 10px;
-    border: 2px solid #333;
-    background: #1a1a1a;
-    color: #fff;
-    font-size: 1rem;
-    outline: none;
-    transition: border-color 0.2s;
-  }
-
-  input:focus { border-color: #ff4444; }
-  input::placeholder { color: #555; }
-
-  button {
-    padding: 14px 24px;
-    border-radius: 10px;
-    border: none;
-    background: linear-gradient(135deg, #ff4444, #ff6b35);
-    color: white;
-    font-size: 1rem;
+    font-family: 'Cinzel', serif;
+    font-size: clamp(2.4rem, 6vw, 4.5rem);
     font-weight: 600;
-    cursor: pointer;
-    transition: opacity 0.2s, transform 0.1s;
+    letter-spacing: 0.12em;
+    color: var(--white);
+    line-height: 1;
+    margin-bottom: 20px;
   }
 
-  button:hover { opacity: 0.9; transform: scale(1.02); }
-  button:active { transform: scale(0.98); }
+  h1 span { color: var(--gold); }
+
+  .divider {
+    width: 80px;
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--silver), transparent);
+    margin: 20px auto;
+  }
+
+  .tagline {
+    font-family: 'IM Fell English', serif;
+    font-style: italic;
+    font-size: 1.05rem;
+    color: var(--silver);
+    letter-spacing: 0.02em;
+  }
+
+  .quote {
+    max-width: 560px;
+    text-align: center;
+    margin-bottom: 56px;
+    animation: fadeUp 1.4s ease 0.2s both;
+  }
+
+  .quote-text {
+    font-family: 'IM Fell English', serif;
+    font-style: italic;
+    font-size: 1.15rem;
+    color: var(--ash);
+    line-height: 1.8;
+  }
+
+  .quote-author {
+    margin-top: 12px;
+    font-family: 'Cinzel', serif;
+    font-size: 0.6rem;
+    letter-spacing: 0.3em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  .input-area {
+    width: 100%;
+    max-width: 680px;
+    margin-bottom: 40px;
+    animation: fadeUp 1.4s ease 0.3s both;
+  }
+
+  .input-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.6rem;
+    letter-spacing: 0.3em;
+    color: var(--silver);
+  }
+
+  .input-row {
+    display: flex;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+    transition: border-color 0.3s;
+    background: var(--deep);
+  }
+
+  .input-row:focus-within { border-color: var(--gold-dim); }
+
+  input[type="text"] {
+    flex: 1;
+    padding: 16px 20px;
+    background: transparent;
+    border: none;
+    color: var(--white);
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.05rem;
+    letter-spacing: 0.03em;
+    outline: none;
+  }
+
+  input::placeholder { color: var(--muted); font-style: italic; }
+
+  button.play-btn {
+    padding: 16px 28px;
+    background: transparent;
+    border: none;
+    border-left: 1px solid var(--border);
+    color: var(--gold);
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.25s, color 0.25s;
+    white-space: nowrap;
+  }
+
+  button.play-btn:hover { background: var(--gold); color: var(--black); }
+
+  .error {
+    margin-top: 10px;
+    font-family: 'IM Fell English', serif;
+    font-style: italic;
+    font-size: 0.9rem;
+    color: #7a4040;
+    display: none;
+  }
+
+  .player-section {
+    width: 100%;
+    max-width: 900px;
+    animation: fadeUp 0.6s ease both;
+  }
+
+  .video-meta {
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .now-playing {
+    font-family: 'Cinzel', serif;
+    font-size: 0.55rem;
+    letter-spacing: 0.35em;
+    color: var(--gold-dim);
+    text-transform: uppercase;
+    flex-shrink: 0;
+  }
+
+  .meta-line { flex: 1; height: 1px; background: var(--border); }
+
+  .video-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.2rem;
+    font-weight: 300;
+    color: var(--light);
+    letter-spacing: 0.04em;
+    margin-bottom: 16px;
+    font-style: italic;
+    min-height: 1.5em;
+    transition: opacity 0.4s;
+  }
 
   .player-wrap {
     width: 100%;
-    max-width: 900px;
     aspect-ratio: 16/9;
-    border-radius: 14px;
-    overflow: hidden;
-    background: #1a1a1a;
-    display: none;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+    background: #000;
+    border: 1px solid var(--border);
+    position: relative;
   }
 
   .player-wrap iframe {
     width: 100%;
     height: 100%;
     border: none;
+    display: block;
   }
 
-  .error {
-    color: #ff6b6b;
-    font-size: 0.9rem;
-    margin-top: -18px;
-    margin-bottom: 18px;
-    display: none;
+  .player-wrap::before,
+  .player-wrap::after {
+    content: '';
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    border-color: var(--gold-dim);
+    border-style: solid;
+    z-index: 3;
+    pointer-events: none;
   }
+  .player-wrap::before { top: -1px; left: -1px; border-width: 1px 0 0 1px; }
+  .player-wrap::after  { bottom: -1px; right: -1px; border-width: 0 1px 1px 0; }
 
-  .tip {
-    margin-top: 20px;
-    color: #555;
-    font-size: 0.8rem;
+  .ornament {
+    font-family: 'Cinzel', serif;
+    font-size: 0.55rem;
+    color: var(--muted);
+    letter-spacing: 0.3em;
     text-align: center;
+    margin: 48px 0 32px;
+  }
+
+  .footer-quote { text-align: center; animation: fadeUp 1.6s ease 0.5s both; }
+  .footer-quote a {
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.25em;
+    color: var(--silver);
+    text-decoration: none;
+    text-transform: lowercase;
+    transition: color 0.2s;
+  }
+  .footer-quote a:hover { color: var(--white); }
+
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
   }
 </style>
 </head>
 <body>
+<div class="page">
 
-<h1>▶ YouTube Player</h1>
-<p class="sub">Paste a YouTube link or video ID to watch without interruptions</p>
+  <header>
+    <h1>Eir<span>ene</span></h1>
+    <p class="tagline">Watch in peace.</p>
+  </header>
 
-<div class="search-bar">
-  <input type="text" id="urlInput" placeholder="https://youtube.com/watch?v=... or video ID" />
-  <button onclick="loadVideo()">Play</button>
+  <div class="quote">
+    <p class="quote-text" id="quoteText">"The eye sees only what the mind is prepared to comprehend."</p>
+    <p class="quote-author" id="quoteAuthor">— Henri Bergson</p>
+  </div>
+
+  <div class="input-area">
+    <label class="input-label" for="urlInput">Paste your link or video ID</label>
+    <div class="input-row">
+      <input type="text" id="urlInput" placeholder="youtube.com/watch?v=... or a raw ID" />
+      <button class="play-btn" onclick="loadVideo()">Play</button>
+    </div>
+    <p class="error" id="error">The abyss could not find your video.</p>
+  </div>
+
+  <div class="player-section" id="playerSection" style="display:none">
+    <div class="video-meta">
+      <span class="now-playing">Now Playing</span>
+      <div class="meta-line"></div>
+    </div>
+    <div class="video-title" id="videoTitle">—</div>
+    <div class="player-wrap">
+      <iframe id="player" allowfullscreen allow="autoplay; encrypted-media"></iframe>
+    </div>
+  </div>
+
+  <div class="ornament">✦ &nbsp; ✦ &nbsp; ✦</div>
+
+  <div class="footer-quote">
+    <a href="https://beacons.ai/pseudonym101" target="_blank" rel="noopener noreferrer">beacons.ai/pseudonym101</a>
+  </div>
+
 </div>
-
-<p class="error" id="error">⚠️ Couldn't find a video ID. Please check your input.</p>
-
-<div class="player-wrap" id="playerWrap">
-  <iframe id="player" allowfullscreen allow="autoplay; encrypted-media"></iframe>
-</div>
-
-<p class="tip">Supports youtube.com, youtu.be links, or raw video IDs</p>
 
 <script>
-  const input = document.getElementById('urlInput');
+  const quotes = [
+    { text: "The eye sees only what the mind is prepared to comprehend.", author: "Henri Bergson" },
+    { text: "To see is to forget the name of the thing one sees.", author: "Paul Valéry" },
+    { text: "All human beings by nature desire to know.", author: "Aristotle" },
+    { text: "Attention is the rarest and purest form of generosity.", author: "Simone Weil" },
+    { text: "The soul never thinks without a picture.", author: "Aristotle" },
+    { text: "We don't see things as they are, we see them as we are.", author: "Anaïs Nin" },
+    { text: "Wonder is the beginning of wisdom.", author: "Socrates" },
+    { text: "The universe is under no obligation to make sense to you.", author: "Neil deGrasse Tyson" },
+  ];
 
-  input.addEventListener('keydown', e => {
-    if (e.key === 'Enter') loadVideo();
-  });
+  const q = quotes[Math.floor(Math.random() * quotes.length)];
+  document.getElementById('quoteText').textContent = `"${q.text}"`;
+  document.getElementById('quoteAuthor').textContent = `— ${q.author}`;
+
+  const input = document.getElementById('urlInput');
+  input.addEventListener('keydown', e => { if (e.key === 'Enter') loadVideo(); });
 
   function extractVideoId(raw) {
     raw = raw.trim();
-
-    // Already an ID (11 chars, no spaces, no slashes)
     if (/^[a-zA-Z0-9_-]{11}$/.test(raw)) return raw;
-
     try {
       const url = new URL(raw);
-
-      // youtu.be/VIDEO_ID
-      if (url.hostname === 'youtu.be') {
-        return url.pathname.slice(1).split('?')[0];
-      }
-
-      // youtube.com/watch?v=VIDEO_ID
+      if (url.hostname === 'youtu.be') return url.pathname.slice(1).split('?')[0];
       const v = url.searchParams.get('v');
       if (v) return v;
-
-      // youtube.com/embed/VIDEO_ID or /shorts/VIDEO_ID
       const match = url.pathname.match(/\/(embed|shorts|v)\/([a-zA-Z0-9_-]{11})/);
       if (match) return match[2];
-
     } catch (_) {}
-
-    // Fallback regex
     const fallback = raw.match(/[?&]v=([a-zA-Z0-9_-]{11})/);
     if (fallback) return fallback[1];
-
     return null;
   }
 
-  function loadVideo() {
+  async function fetchTitle(videoId) {
+    try {
+      const res = await fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`);
+      if (!res.ok) return null;
+      const data = await res.json();
+      return data.title || null;
+    } catch { return null; }
+  }
+
+  async function loadVideo() {
     const raw = input.value;
     const videoId = extractVideoId(raw);
     const err = document.getElementById('error');
-    const wrap = document.getElementById('playerWrap');
+    const section = document.getElementById('playerSection');
     const player = document.getElementById('player');
+    const titleEl = document.getElementById('videoTitle');
 
-    if (!videoId) {
-      err.style.display = 'block';
-      wrap.style.display = 'none';
-      return;
-    }
+    if (!videoId) { err.style.display = 'block'; return; }
 
     err.style.display = 'none';
-    // autoplay=1, rel=0 (no related ads), modestbranding=1
+    titleEl.style.opacity = '0.3';
+    titleEl.textContent = '—';
+
     player.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0&modestbranding=1`;
-    wrap.style.display = 'block';
-    wrap.scrollIntoView({ behavior: 'smooth' });
+    section.style.display = 'block';
+    section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    const title = await fetchTitle(videoId);
+    titleEl.textContent = title || '—';
+    titleEl.style.opacity = '1';
   }
 </script>
-
 </body>
 </html>
