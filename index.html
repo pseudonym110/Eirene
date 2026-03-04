@@ -236,45 +236,60 @@
     margin-bottom: 16px;
   }
 
-  .toggle-label {
-    font-family: 'Cinzel', serif;
-    font-size: 0.55rem;
-    letter-spacing: 0.25em;
-    color: var(--gold-dim);
-    text-transform: uppercase;
+  .autoplay-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 16px 7px 12px;
+    border: 1px solid var(--border);
+    background: var(--deep);
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
     user-select: none;
   }
 
-  .toggle {
-    position: relative;
-    width: 36px;
-    height: 18px;
-    cursor: pointer;
+  .autoplay-btn.on {
+    border-color: var(--white);
+    background: var(--white);
   }
 
-  .toggle input { opacity: 0; width: 0; height: 0; }
-
-  .toggle-track {
-    position: absolute;
-    inset: 0;
-    background: var(--muted);
-    border: 1px solid var(--border);
-    transition: background 0.3s;
+  .autoplay-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--ash);
+    transition: background 0.2s;
+    flex-shrink: 0;
   }
 
-  .toggle input:checked + .toggle-track { background: var(--silver); }
-
-  .toggle-thumb {
-    position: absolute;
-    top: 2px;
-    left: 2px;
-    width: 12px;
-    height: 12px;
+  .autoplay-btn.on .autoplay-dot {
     background: var(--black);
-    transition: transform 0.3s;
   }
 
-  .toggle input:checked ~ .toggle-thumb { transform: translateX(18px); }
+  .autoplay-text {
+    font-family: 'Cinzel', serif;
+    font-size: 0.55rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--silver);
+    transition: color 0.2s;
+  }
+
+  .autoplay-btn.on .autoplay-text {
+    color: var(--black);
+  }
+
+  .autoplay-status {
+    font-family: 'IM Fell English', serif;
+    font-style: italic;
+    font-size: 0.8rem;
+    color: var(--ash);
+    transition: color 0.2s;
+  }
+
+  .autoplay-btn.on + .autoplay-status {
+    color: var(--silver);
+  }
 
   /* two-column layout */
   .player-layout {
@@ -446,12 +461,11 @@
     <div class="video-title" id="videoTitle">—</div>
 
     <div class="controls-bar">
-      <span class="toggle-label">Autoplay</span>
-      <label class="toggle">
-        <input type="checkbox" id="autoplayToggle" checked>
-        <div class="toggle-track"></div>
-        <div class="toggle-thumb"></div>
-      </label>
+      <div class="autoplay-btn on" id="autoplayBtn" onclick="toggleAutoplay()">
+        <div class="autoplay-dot"></div>
+        <span class="autoplay-text">Autoplay</span>
+      </div>
+      <span class="autoplay-status" id="autoplayStatus">Loop on</span>
     </div>
 
     <div class="player-layout">
@@ -541,9 +555,23 @@
     } catch { return []; }
   }
 
+  let autoplayOn = true;
+
+  function toggleAutoplay() {
+    autoplayOn = !autoplayOn;
+    const btn = document.getElementById('autoplayBtn');
+    const status = document.getElementById('autoplayStatus');
+    btn.classList.toggle('on', autoplayOn);
+    status.textContent = autoplayOn ? 'Loop on' : 'Loop off';
+    const player = document.getElementById('player');
+    if (player.src && player.src.includes('youtube.com/embed')) {
+      const match = player.src.match(/embed\/([a-zA-Z0-9_-]{11})/);
+      if (match) player.src = buildIframeSrc(match[1]);
+    }
+  }
+
   function buildIframeSrc(videoId) {
-    const autoplay = document.getElementById('autoplayToggle').checked;
-    return `https://www.youtube.com/embed/${videoId}?autoplay=${autoplay ? 1 : 0}&rel=0&modestbranding=1${autoplay ? '&loop=1&playlist=' + videoId : ''}`;
+    return `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0&modestbranding=1${autoplayOn ? '&loop=1&playlist=' + videoId : ''}`;
   }
 
   function playVideoById(videoId) {
